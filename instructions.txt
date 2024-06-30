@@ -1,0 +1,44 @@
+1. Launch an ec2 instance and edit the inbound traffic security group to allow all trafic (or give your ip address alone)
+
+2. SSH into the instance and download Kafka (binary) from the site (https://kafka.apache.org/downloads).
+   - wget https://downloads.apache.org/kafka/3.7.0/kafka_2.13-3.7.0.tgz
+
+3. Decompress the folder:
+   - tar -xvf kafka_2.13-3.7.0
+
+4. Install java:
+   - sudo yum install java
+
+5. Change server.properties to the public IP address of the vm.
+   - cd kafka_2.13-3.7.0
+   - sudo nano config/server.properties
+   - Uncomment and change ADVERTISED_LISTENENERS to the public ip address of the ec2 instance
+   
+6. Start the ZooKeeper server
+   - bin/zookeeper-server-start.sh config/zookeeper.properties
+   
+7. In a new session, start the kafka server.
+   - export KAFKA_HEAP_OPTS= "-Xmx256M -Xms128M"
+   - cd kafka_2.13-3.7.0
+   - bin/kafka-server-start.sh config/server.properties
+
+8. In a new session, create topic
+   - cd kafka_2.13-3.7.0
+   - bin/kafka-topics.sh --create --topic {TOPIC_NAME} --bootstrap-server {Public IP of THE EC2 Instance:9092} --replication-factor 1 --partitions 1
+
+9. Start the producer
+   - bin/kafka-console-producer.sh --topic {TOPIC_NAME} --bootstrap-server {Public IP of THE EC2 Instance:9092} 
+
+10. In a new session, start the consumer
+   - cd kafka_2.13-3.7.0
+   - bin/kafka-console-consumer.sh --topic {TOPIC_NAME} --bootstrap-server {Public IP of THE EC2 Instance:9092} 
+
+11. Launch jupyter notebook and create 2 files: kafka_producer and kafka_consumer. Read the Stock Data from the file.
+
+12. Create a new user and give programatic access to the user. Provide the ACCESS_KEY and SECRET_KEY in the code.
+
+13. Launch a new s3 bucket. Send the data consumed by the consumer as objects to the s3 bucket.
+
+14. Use Glue -> crawler to crawl the s3 bucket and create a database. Create a role giving permission of the s3 bucket to the crawler.
+
+15. Import that database to Athena and query on that data. Store the query results in a new or existing s3 bucket.
